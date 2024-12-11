@@ -1,18 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchStudents } from '../studentSlice';
+// import { fetchStudents } from '../studentSlice';
 import { Link } from 'react-router-dom';
 import Papa from 'papaparse';
+// import StudentReducerState from '../reducer/studentReducer';
+import { updateStudentAction } from './../actions/studentAction'
+import { fetchStudents } from './../axios';
 
 function StudentList() {
   const dispatch = useDispatch();
-  const { students, loading, error } = useSelector(state => state.students);
+  const reducer = useSelector((state) => state);
+  const { studentData } = reducer;
+  console.log(reducer, "reducer");
+  let students = null;
+  let loading = false;
+  let error = null;
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  console.log("inside comp");
 
   useEffect(() => {
-    dispatch(fetchStudents());
-  }, [dispatch]);
+    const login = loginUser();
+
+    login.then((data) => {
+      students = data;
+      let payload = {
+        data: students,
+        type: "loginuser"
+      }
+      dispatch(updateStudentAction(payload))
+    });
+  }, []);
 
   const totalPages = students ? Math.ceil(students.length / itemsPerPage) : 0;
 
@@ -34,9 +53,7 @@ function StudentList() {
       Mobile: student.mobile_no,
       Department: student.department,
       DOB: student.dob,
-      Address: student.addresses
-        ? student.addresses.map(addr => `${addr.address1}, ${addr.city}, ${addr.state}, ${addr.zipcode}`).join('; ')
-        : 'No address available',
+      AddressCount: student.addresses ? student.addresses.length : 0,  // Showing address count
     }));
 
     const csv = Papa.unparse(csvData);
@@ -97,13 +114,14 @@ function StudentList() {
               <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Mobile No</th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Department</th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">DOB</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Address</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Address Count</th> {/* Changed to Address Count */}
               <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {students && students.length > 0 ? (
-              students.map(student => (
+            {studentData && studentData.length > 0 ? (
+              studentData.map(student => (
+                console.log('Addresses for student', student.id, student.addresses),
                 <tr key={student.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm text-gray-700">
                     <Link to={`/view/${student.id}`}>
@@ -115,16 +133,7 @@ function StudentList() {
                   <td className="px-4 py-3 text-sm text-gray-700">{student.department}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">{student.dob}</td>
                   <td className="px-4 py-3 text-sm text-gray-700">
-                    {student.addresses && student.addresses.length > 0 ? (
-                      student.addresses.map(address => (
-                        <div key={address.id}>
-                          <p>{address.address1}</p>
-                          <p>{address.city}, {address.state}, {address.zipcode}</p>
-                        </div>
-                      ))
-                    ) : (
-                      'No address available'
-                    )}
+                    {studentData.addresses ? studentData.addresses.length : 0} {/* Showing address count */}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-700">
                     <Link to={`/view/${student.id}`} className="text-blue-600 hover:text-blue-800 mr-4">View</Link>
@@ -134,6 +143,7 @@ function StudentList() {
                 </tr>
               ))
             ) : (
+              
               <tr>
                 <td colSpan="7" className="text-center text-gray-700">No students found</td>
               </tr>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { addStudent } from '../studentSlice'; // Import addStudent action
+// import { addStudent } from '../studentSlice'; 
 import { Link } from 'react-router-dom';
 
 function AddStudent() {
@@ -55,14 +55,14 @@ function AddStudent() {
     setFormError('');
 
     // API call to add student
-    dispatch(addStudent(student))
-      .then(() => {
+    // dispatch(addStudent(student))
+      // .then(() => {
         // On successful addition, redirect to the student list page
-        navigate('/studentList');
-      })
-      .catch((error) => {
-        console.error('Error adding student:', error);
-      });
+      //   navigate('/studentList');
+      // })
+      // .catch((error) => {
+      //   console.error('Error adding student:', error);
+      // });
   };
 
   return (
